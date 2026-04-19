@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Hangman Game</title>
+<style>
+    body {
+        font-family: Arial;
+        text-align: center;
+        background: linear-gradient(135deg, #74ebd5, #9face6);
+        margin: 0;
+        padding: 20px;
+    }
+
+```
+#container {
+    background: white;
+    border-radius: 15px;
+    padding: 20px;
+    max-width: 600px;
+    margin: auto;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+}
+
+#word {
+    font-size: 28px;
+    letter-spacing: 8px;
+    margin: 20px;
+    line-height: 1.6;
+}
+
+#letters button {
+    margin: 5px;
+    padding: 10px;
+    font-size: 16px;
+    cursor: pointer;
+    border-radius: 8px;
+    border: none;
+    background: #eee;
+    transition: 0.2s;
+}
+
+#letters button:hover {
+    background: #ccc;
+    transform: scale(1.1);
+}
+
+button.main {
+    padding: 10px 20px;
+    font-size: 16px;
+    border: none;
+    border-radius: 10px;
+    background: #6c63ff;
+    color: white;
+    cursor: pointer;
+}
+
+#status {
+    font-size: 20px;
+    margin-top: 15px;
+    font-weight: bold;
+}
+
+#hangman {
+    white-space: pre;
+    font-family: monospace;
+    font-size: 28px;   /* was 18px → now bigger */
+    line-height: 1.2;  /* keeps proportions nice */
+    margin-top: 20px;
+}
+
+.shake {
+    animation: shake 0.3s;
+}
+
+@keyframes shake {
+    0% { transform: translateX(0); }
+    25% { transform: translateX(-5px); }
+    50% { transform: translateX(5px); }
+    75% { transform: translateX(-5px); }
+    100% { transform: translateX(0); }
+}
+```
+
+</style>
+</head>
+<body>
+
+<div id="container">
+<h1>Hangman Game</h1>
+
+<div id="game">
+    <div id="hangman"></div>
+    <div id="word"></div>
+    <div id="letters"></div>
+    <div id="status"></div>
+    <br>
+    <button class="main" onclick="restartGame()">🔁 Restart</button>
+</div>
+</div>
+
+<script>
+const lines = [
+    "HAPPY_FEAST",
+    "OF_RESURRECTION"
+];
+
+let guessed = [];
+let wrongGuesses = 0;
+const maxWrong = 6;
+
+const stages = [
+`
+ +---+
+ |   |
+     |
+     |
+     |
+     |
+=========`,
+`
+ +---+
+ |   |
+ O   |
+     |
+     |
+     |
+=========`,
+`
+ +---+
+ |   |
+ O   |
+ |   |
+     |
+     |
+=========`,
+`
+ +---+
+ |   |
+ O   |
+/|   |
+     |
+     |
+=========`,
+`
+ +---+
+ |   |
+ O   |
+/|\\  |
+     |
+     |
+=========`,
+`
+ +---+
+ |   |
+ O   |
+/|\\  |
+/    |
+     |
+=========`,
+`
+ +---+
+ |   |
+ O   |
+/|\\  |
+/ \\  |
+     |
+=========`
+];
+
+function restartGame() {
+    guessed = [];
+    wrongGuesses = 0;
+    document.getElementById("status").innerText = "";
+    createLetters();
+    displayWord();
+    updateHangman();
+}
+
+function displayLine(line) {
+    let display = "";
+    for (let char of line) {
+        if (char === "_") {
+            display += "_ ";
+        } else if (guessed.includes(char)) {
+            display += char + " ";
+        } else {
+            display += "_ ";
+        }
+    }
+    return display;
+}
+
+function displayWord() {
+    const line1 = displayLine(lines[0]);
+    const line2 = displayLine(lines[1]);
+
+    document.getElementById("word").innerText = line1 + "\n" + line2;
+}
+
+function updateHangman() {
+    document.getElementById("hangman").innerText = stages[wrongGuesses];
+}
+
+function checkWin() {
+    for (let line of lines) {
+        for (let char of line) {
+            if (char !== "_" && !guessed.includes(char)) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
+function createLetters() {
+    const lettersDiv = document.getElementById("letters");
+    lettersDiv.innerHTML = "";
+    const alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+    for (let letter of alphabet) {
+        let btn = document.createElement("button");
+        btn.innerText = letter;
+
+        btn.onclick = function() {
+            btn.disabled = true;
+
+            let found = false;
+            for (let line of lines) {
+                if (line.includes(letter)) {
+                    found = true;
+                }
+            }
+
+            if (found) {
+                guessed.push(letter);
+            } else {
+                wrongGuesses++;
+                document.getElementById("hangman").classList.add("shake");
+                setTimeout(() => {
+                    document.getElementById("hangman").classList.remove("shake");
+                }, 300);
+            }
+
+            displayWord();
+            updateHangman();
+
+            if (checkWin()) {
+                document.getElementById("status").innerText = "🎉 You Win!";
+                disableAll();
+            } else if (wrongGuesses >= maxWrong) {
+                document.getElementById("status").innerText =
+                    "💀 You Lose!";
+                disableAll();
+            } else {
+                document.getElementById("status").innerText =
+                    "Wrong guesses: " + wrongGuesses + "/" + maxWrong;
+            }
+        };
+
+        lettersDiv.appendChild(btn);
+    }
+}
+
+function disableAll() {
+    const buttons = document.querySelectorAll("#letters button");
+    buttons.forEach(btn => btn.disabled = true);
+}
+
+// start immediately
+restartGame();
+</script>
+
+</body>
+</html>
