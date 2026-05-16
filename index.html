@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -13,82 +12,110 @@
         padding: 20px;
     }
 
-```
-#container {
-    background: white;
-    border-radius: 15px;
-    padding: 20px;
-    max-width: 600px;
-    margin: auto;
-    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-}
+    #container {
+        background: white;
+        border-radius: 15px;
+        padding: 20px;
+        max-width: 600px;
+        margin: auto;
+        box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+    }
 
-#word {
-    font-size: 28px;
-    letter-spacing: 8px;
-    margin: 20px;
-    line-height: 1.6;
-}
+    #word {
+        font-size: 28px;
+        letter-spacing: 8px;
+        margin: 20px;
+        line-height: 1.6;
+        white-space: pre-line;
+    }
 
-#letters button {
-    margin: 5px;
-    padding: 10px;
-    font-size: 16px;
-    cursor: pointer;
-    border-radius: 8px;
-    border: none;
-    background: #eee;
-    transition: 0.2s;
-}
+    #letters button {
+        margin: 5px;
+        padding: 10px;
+        font-size: 16px;
+        cursor: pointer;
+        border-radius: 8px;
+        border: none;
+        background: #eee;
+        transition: 0.2s;
+    }
 
-#letters button:hover {
-    background: #ccc;
-    transform: scale(1.1);
-}
+    #letters button:hover {
+        background: #ccc;
+        transform: scale(1.1);
+    }
 
-button.main {
-    padding: 10px 20px;
-    font-size: 16px;
-    border: none;
-    border-radius: 10px;
-    background: #6c63ff;
-    color: white;
-    cursor: pointer;
-}
+    button.main {
+        padding: 10px 20px;
+        font-size: 16px;
+        border: none;
+        border-radius: 10px;
+        background: #6c63ff;
+        color: white;
+        cursor: pointer;
+    }
 
-#status {
-    font-size: 20px;
-    margin-top: 15px;
-    font-weight: bold;
-}
+    #status {
+        font-size: 20px;
+        margin-top: 15px;
+        font-weight: bold;
+    }
 
-#hangman {
-    white-space: pre;
-    font-family: monospace;
-    font-size: 28px;   /* was 18px → now bigger */
-    line-height: 1.2;  /* keeps proportions nice */
-    margin-top: 20px;
-}
+    #hangman {
+        white-space: pre;
+        font-family: monospace;
+        font-size: 28px;
+        line-height: 1.2;
+        margin-top: 20px;
+    }
 
-.shake {
-    animation: shake 0.3s;
-}
+    .shake {
+        animation: shake 0.3s;
+    }
 
-@keyframes shake {
-    0% { transform: translateX(0); }
-    25% { transform: translateX(-5px); }
-    50% { transform: translateX(5px); }
-    75% { transform: translateX(-5px); }
-    100% { transform: translateX(0); }
-}
-```
+    @keyframes shake {
+        0% { transform: translateX(0); }
+        25% { transform: translateX(-5px); }
+        50% { transform: translateX(5px); }
+        75% { transform: translateX(-5px); }
+        100% { transform: translateX(0); }
+    }
 
+    #wordInputArea {
+        margin-bottom: 20px;
+    }
+
+    #customWord {
+        width: 80%;
+        padding: 10px;
+        font-size: 16px;
+        border-radius: 8px;
+        border: 1px solid #aaa;
+    }
+
+    #startBtn {
+        padding: 10px 20px;
+        margin-top: 10px;
+        font-size: 16px;
+        border: none;
+        border-radius: 10px;
+        background: #28a745;
+        color: white;
+        cursor: pointer;
+    }
 </style>
 </head>
 <body>
 
 <div id="container">
 <h1>Hangman Game</h1>
+
+<!-- ⭐ NEW INPUT FIELD -->
+<div id="wordInputArea">
+    <input id="customWord" type="text" placeholder="Enter your phrase (e.g., Happy Feast of Resurrection)">
+    <br>
+    <button id="startBtn" onclick="startCustomGame()">Start Game</button>
+</div>
 
 <div id="game">
     <div id="hangman"></div>
@@ -101,66 +128,56 @@ button.main {
 </div>
 
 <script>
-const lines = [
-    "HAPPY_FEAST",
-    "OF_RESURRECTION"
-];
+let lines = [];  // ⭐ now dynamic
 
 let guessed = [];
 let wrongGuesses = 0;
 const maxWrong = 6;
 
 const stages = [
-`
- +---+
+` +---+
  |   |
      |
      |
      |
      |
 =========`,
-`
- +---+
+` +---+
  |   |
  O   |
      |
      |
      |
 =========`,
-`
- +---+
+` +---+
  |   |
  O   |
  |   |
      |
      |
 =========`,
-`
- +---+
+` +---+
  |   |
  O   |
 /|   |
      |
      |
 =========`,
-`
- +---+
+` +---+
  |   |
  O   |
 /|\\  |
      |
      |
 =========`,
-`
- +---+
+` +---+
  |   |
  O   |
 /|\\  |
 /    |
      |
 =========`,
-`
- +---+
+` +---+
  |   |
  O   |
 /|\\  |
@@ -168,6 +185,21 @@ const stages = [
      |
 =========`
 ];
+
+// ⭐ NEW FUNCTION: Load phrase from input
+function startCustomGame() {
+    const input = document.getElementById("customWord").value.trim();
+
+    if (input.length === 0) {
+        alert("Please enter a word or phrase.");
+        return;
+    }
+
+    // Split into lines by spaces
+    lines = input.toUpperCase().split(" ");
+
+    restartGame();
+}
 
 function restartGame() {
     guessed = [];
@@ -193,10 +225,11 @@ function displayLine(line) {
 }
 
 function displayWord() {
-    const line1 = displayLine(lines[0]);
-    const line2 = displayLine(lines[1]);
-
-    document.getElementById("word").innerText = line1 + "\n" + line2;
+    let output = "";
+    for (let line of lines) {
+        output += displayLine(line) + "\n";
+    }
+    document.getElementById("word").innerText = output;
 }
 
 function updateHangman() {
@@ -226,12 +259,7 @@ function createLetters() {
         btn.onclick = function() {
             btn.disabled = true;
 
-            let found = false;
-            for (let line of lines) {
-                if (line.includes(letter)) {
-                    found = true;
-                }
-            }
+            let found = lines.some(line => line.includes(letter));
 
             if (found) {
                 guessed.push(letter);
@@ -250,8 +278,7 @@ function createLetters() {
                 document.getElementById("status").innerText = "🎉 You Win!";
                 disableAll();
             } else if (wrongGuesses >= maxWrong) {
-                document.getElementById("status").innerText =
-                    "💀 You Lose!";
+                document.getElementById("status").innerText = "💀 You Lose!";
                 disableAll();
             } else {
                 document.getElementById("status").innerText =
@@ -267,9 +294,6 @@ function disableAll() {
     const buttons = document.querySelectorAll("#letters button");
     buttons.forEach(btn => btn.disabled = true);
 }
-
-// start immediately
-restartGame();
 </script>
 
 </body>
