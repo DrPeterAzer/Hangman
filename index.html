@@ -110,7 +110,7 @@
 <div id="container">
 <h1>Hangman Game</h1>
 
-<!-- ⭐ NEW INPUT FIELD -->
+<!-- ⭐ Input disappears after starting -->
 <div id="wordInputArea">
     <input id="customWord" type="text" placeholder="Enter your phrase (e.g., Happy Feast of Resurrection)">
     <br>
@@ -128,8 +128,7 @@
 </div>
 
 <script>
-let lines = [];  // ⭐ now dynamic
-
+let lines = [];  // dynamic phrase
 let guessed = [];
 let wrongGuesses = 0;
 const maxWrong = 6;
@@ -186,7 +185,7 @@ const stages = [
 =========`
 ];
 
-// ⭐ NEW FUNCTION: Load phrase from input
+// ⭐ Hide input after starting
 function startCustomGame() {
     const input = document.getElementById("customWord").value.trim();
 
@@ -195,8 +194,10 @@ function startCustomGame() {
         return;
     }
 
-    // Split into lines by spaces
     lines = input.toUpperCase().split(" ");
+
+    // Hide input area
+    document.getElementById("wordInputArea").style.display = "none";
 
     restartGame();
 }
